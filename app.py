@@ -4,40 +4,28 @@ from pathlib import Path
 
 # Set page config
 st.set_page_config(
-    page_title="파일 공유",
-    page_icon="📁",
+    page_title="Cafe24 Customized Proposal",
+    page_icon="📊",
     layout="wide"
 )
 
 # Title
-st.title("📁 파일 공유 서비스")
+st.title("📊 Cafe24 Customized Proposal")
 
-# 다운로드 폴더 경로
-downloads_path = str(Path.home() / "Downloads")
+# 서버 파일 경로
+server_path = os.path.join("files", "server.js")
 
-# 파일 목록 가져오기
-files = [f for f in os.listdir(downloads_path) if os.path.isfile(os.path.join(downloads_path, f))]
-
-if files:
-    st.subheader("사용 가능한 파일 목록")
-    
-    # 파일 목록을 표시
-    for file in files:
-        file_path = os.path.join(downloads_path, file)
-        file_size = os.path.getsize(file_path) / 1024  # KB 단위로 변환
-        
-        col1, col2, col3 = st.columns([3, 1, 1])
-        with col1:
-            st.write(f"📄 {file}")
-        with col2:
-            st.write(f"{file_size:.1f} KB")
-        with col3:
-            with open(file_path, "rb") as f:
-                st.download_button(
-                    label="다운로드",
-                    data=f,
-                    file_name=file,
-                    mime="application/octet-stream"
-                )
+# 서버 파일 내용 표시
+if os.path.exists(server_path):
+    with open(server_path, 'r') as f:
+        server_code = f.read()
+        st.code(server_code, language='javascript')
 else:
-    st.info("다운로드 폴더에 파일이 없습니다.") 
+    st.error("서버 파일을 찾을 수 없습니다.")
+
+# 다른 파일들도 표시
+st.subheader("프로젝트 파일 목록")
+for root, dirs, files in os.walk("files"):
+    for file in files:
+        file_path = os.path.join(root, file)
+        st.write(f"📄 {file_path}") 
