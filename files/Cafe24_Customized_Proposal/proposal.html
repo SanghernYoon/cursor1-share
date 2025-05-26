@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>카페24 영업 제안서</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="proposal.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: #fff;
+      min-height: 100vh;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    #loadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(255,255,255,0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s;
+    }
+    .circle-loader {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 16px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .circle-loader svg {
+      width: 80px;
+      height: 80px;
+      transform: rotate(-90deg);
+    }
+    .circle-bg {
+      stroke: #e6e6e6;
+      stroke-width: 6;
+    }
+    .circle-fg {
+      stroke: #0072ff;
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-dasharray: 220;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.2s linear;
+    }
+    .analyzing-text, .loading-text {
+      color: #0066d9;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .progress-bar-wrap, .loading-progress {
+      width: 320px;
+      max-width: 90vw;
+      margin: 0 auto 8px auto;
+      background: none;
+    }
+    .progress {
+      height: 12px;
+      background: #f2f2f2;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      background: linear-gradient(90deg, #0072ff 60%, #00c6ff 100%);
+      transition: width 0.3s;
+    }
+    .progress-percent, #loadingPercentage {
+      text-align: center;
+      color: #222;
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 0;
+    }
+    /* 결과 페이지용 추가 스타일 proposal_result.html에서 복사 */
+    /* ... (필요한 추가 스타일 삽입) ... */
+    #performanceRadarChart {
+      display: block !important;
+      background: #fff;
+    }
+    /* 앱스토어 롤링 슬라이더 개선 */
+    #appstore-slider {
+      gap: 4px;
+    }
+    .app-slide {
+      flex: 0 0 7%;
+      max-width: 7%;
+      min-width: 80px;
+    }
+    /* 앱 카드 간격 보장 (구버전 브라우저 대응) */
+    #appstore-slider > .app-slide:not(:last-child) {
+      margin-right: 0;
+    }
+    /* 화살표 버튼 스타일 개선 (Swiper 스타일) */
+    .swiper-button-prev, .swiper-button-next {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.13);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      transition: box-shadow 0.2s;
+      cursor: pointer;
+      opacity: 1;
+      padding: 0;
+    }
+    .swiper-button-prev {
+      left: 12px;
+    }
+    .swiper-button-next {
+      right: 12px;
+    }
+    .swiper-button-prev img, .swiper-button-next img {
+      width: 36px;
+      height: 36px;
+      display: block;
+      filter: none !important;
+    }
+    .swiper-button-prev:active, .swiper-button-next:active,
+    .swiper-button-prev:focus, .swiper-button-next:focus,
+    .swiper-button-prev:hover, .swiper-button-next:hover {
+      background: #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.16);
+      border: none;
+    }
+    .swiper-button-prev.swiper-button-disabled,
+    .swiper-button-next.swiper-button-disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    @media (max-width: 991px) {
+      .swiper-button-prev, .swiper-button-next {
+        width: 48px;
+        height: 48px;
+      }
+      .swiper-button-prev img, .swiper-button-next img {
+        width: 28px;
+        height: 28px;
+      }
+      .swiper-button-prev { left: 4px; }
+      .swiper-button-next { right: 4px; }
+    }
+    @media (max-width: 575px) {
+      .swiper-button-prev, .swiper-button-next {
+        width: 40px;
+        height: 40px;
+      }
+      .swiper-button-prev img, .swiper-button-next img {
+        width: 20px;
+        height: 20px;
+      }
+      .swiper-button-prev { left: 0; }
+      .swiper-button-next { right: 0; }
+    }
+    .appstore-slider-wrapper {
+      padding-left: 72px;
+      padding-right: 72px;
+      position: relative;
+    }
+    @media (max-width: 991px) {
+      .appstore-slider-wrapper {
+        padding-left: 56px;
+        padding-right: 56px;
+      }
+      .app-slide { flex: 0 0 calc(50% - 10px); max-width: calc(50% - 10px); }
+    }
+    @media (max-width: 575px) {
+      .appstore-slider-wrapper {
+        padding-left: 32px;
+        padding-right: 32px;
+      }
+      .app-slide { flex: 0 0 100%; max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 로딩 오버레이 -->
+  <div id="loadingOverlay">
+    <div class="circle-loader">
+      <svg>
+        <circle class="circle-bg" cx="40" cy="40" r="35" fill="none" />
+        <circle class="circle-fg" cx="40" cy="40" r="35" fill="none" stroke-dasharray="220" stroke-dashoffset="220" />
+      </svg>
+    </div>
+    <div class="analyzing-text">데이터 분석 중입니다...</div>
+    <div class="progress-bar-wrap">
+      <div class="progress">
+        <div class="progress-bar" id="loadingProgressBar" role="progressbar" style="width: 0%"></div>
+      </div>
+    </div>
+    <div class="progress-percent" id="loadingPercentage">0%</div>
+  </div>
+
+  <!-- 결과 페이지 전체 구조 (proposal_result.html 내용) -->
+  <div id="resultPage" style="display:none;">
+    <header class="py-3 bg-white border-bottom">
+      <div class="container d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <img src="https://img.echosting.cafe24.com/imgcafe24com/images/common/cafe24.svg" alt="카페24 로고" class="logo me-3">
+          <span id="domain-text" class="domain-text">domain.com</span>
+        </div>
+        <a href="index.html" class="btn btn-outline-primary btn-sm">돌아가기</a>
+      </div>
+    </header>
+    <div class="container py-4">
+      <!-- 맞춤형 타이틀 및 부제목 -->
+      <div class="brand-header-container mb-4">
+        <h1 class="brand-title"><span id="domain-display">도메인</span>을 위한 카페24 제안서</h1>
+        <p class="brand-subtitle">카페24로 전환하여 경쟁력을 높이고 비즈니스 성장을 가속화하세요.</p>
+      </div>
+      <!-- 현재 쇼핑몰 분석 섹션 -->
+      <div class="card shadow-sm mb-5">
+        <div class="card-body p-4">
+          <h2 class="section-title">
+            <i class="bi bi-graph-up-arrow"></i> 현재 쇼핑몰 분석
+          </h2>
+          <p class="section-description">
+            <span id="domain-name">도메인</span> 쇼핑몰의 성능 및 운영 비용 분석 결과입니다. 이 데이터는 카페24로 전환 시 개선될 수 있는 영역을 보여줍니다.
+          </p>
+          <div class="row mt-4 g-4">
+            <div class="col-md-3 col-6">
+              <div class="metric-card" id="metric-speed">
+                <div class="metric-tooltip">
+                  <span class="metric-tooltip-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#0072ff" viewBox="0 0 24 24">
+                      <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm.75 15h-1.5v-6h1.5v6zm0-8h-1.5V7h1.5v2z"/>
+                    </svg>
+                  </span>
+                  <div class="metric-tooltip-content">
+                    <strong>로딩 속도 점수 (100/100)</strong><br><br>
+                    이 점수는 웹사이트의 실제 로딩 속도와 성능을 종합적으로 평가합니다.<br><br>
+                    <strong>주요 평가 항목:</strong><br>
+                    • 첫 콘텐츠 표시(FCP)<br>
+                    • 최대 콘텐츠 표시(LCP)<br>
+                    • 상호작용 준비 시간(TTI)<br>
+                    • 누적 레이아웃 이동(CLS)<br>
+                    • 자바스크립트/이미지 최적화<br>
+                    • 서버 응답 속도<br><br>
+                    <strong>Google PageSpeed 기준:</strong><br>
+                    • 90-100: 매우 빠름<br>
+                    • 80-89: 양호<br>
+                    • 70-79: 개선 필요<br>
+                    • 70 미만: 느림, 개선 필요
+                  </div>
+                </div>
+                <div class="metric-icon">
+                  <i class="bi bi-speedometer"></i>
+                </div>
+                <h3 class="metric-title">로딩 속도
+                </h3>
+                <div class="progress">
+                  <div class="progress-bar" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="metric-value"></div>
+                <div class="metric-description">페이지 로딩 속도 점수</div>
+              </div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="metric-card" id="metric-mobile">
+                <div class="metric-tooltip">
+                  <span class="metric-tooltip-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#0072ff" viewBox="0 0 24 24">
+                      <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm.75 15h-1.5v-6h1.5v6zm0-8h-1.5V7h1.5v2z"/>
+                    </svg>
+                  </span>
+                  <div class="metric-tooltip-content">
+                    <strong>모바일 최적화(접근성) 점수 (100/100)</strong><br><br>
+                    이 점수는 모바일 환경에서의 사용 편의성과 접근성을 평가합니다.<br><br>
+                    <strong>주요 평가 항목:</strong><br>
+                    • 터치 영역 크기<br>
+                    • 반응형 웹 디자인<br>
+                    • 키보드 접근성<br>
+                    • 색상 대비<br>
+                    • 텍스트 크기<br>
+                    • 스크린 리더 호환성<br>
+                    • 이미지 대체 텍스트<br><br>
+                    <strong>Google PageSpeed 기준:</strong><br>
+                    • 90-100: 우수<br>
+                    • 80-89: 양호<br>
+                    • 70-79: 개선 필요<br>
+                    • 70 미만: 심각한 개선 필요
+                  </div>
+                </div>
+                <div class="metric-icon">
+                  <i class="bi bi-phone"></i>
+                </div>
+                <h3 class="metric-title">모바일 최적화
+                </h3>
+                <div class="progress">
+                  <div class="progress-bar" role="progressbar" style="width: 59%;" aria-valuenow="59" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="metric-value"></div>
+                <div class="metric-description">모바일 사용자 경험 점수</div>
+              </div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="metric-card" id="metric-seo">
+                <div class="metric-tooltip">
+                  <span class="metric-tooltip-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#0072ff" viewBox="0 0 24 24">
+                      <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm.75 15h-1.5v-6h1.5v6zm0-8h-1.5V7h1.5v2z"/>
+                    </svg>
+                  </span>
+                  <div class="metric-tooltip-content">
+                    <strong>SEO 점수 (100/100)</strong><br><br>
+                    이 점수는 검색엔진이 웹사이트를 잘 인식하고 색인할 수 있는지 평가합니다.<br><br>
+                    <strong>주요 평가 항목:</strong><br>
+                    • 메타 태그(제목, 설명)<br>
+                    • robots.txt, sitemap.xml<br>
+                    • 구조화 데이터<br>
+                    • 모바일 친화성<br>
+                    • 페이지 내 링크 구조<br>
+                    • 적절한 헤딩 태그 사용<br>
+                    • 이미지 대체 텍스트<br><br>
+                    <strong>Google PageSpeed 기준:</strong><br>
+                    • 90-100: 최적화 우수<br>
+                    • 80-89: 양호<br>
+                    • 70-79: 개선 필요<br>
+                    • 70 미만: 심각한 개선 필요
+                  </div>
+                </div>
+                <div class="metric-icon">
+                  <i class="bi bi-search"></i>
+                </div>
+                <h3 class="metric-title">SEO 점수
+                </h3>
+                <div class="progress">
+                  <div class="progress-bar" role="progressbar" style="width: 74%;" aria-valuenow="74" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="metric-value"></div>
+                <div class="metric-description">검색 엔진 최적화 점수</div>
+              </div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="metric-card" id="metric-security">
+                <div class="metric-tooltip">
+                  <span class="metric-tooltip-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#0072ff" viewBox="0 0 24 24">
+                      <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm.75 15h-1.5v-6h1.5v6zm0-8h-1.5V7h1.5v2z"/>
+                    </svg>
+                  </span>
+                  <div class="metric-tooltip-content">
+                    <strong>보안/권장사항 점수 (100/100)</strong><br><br>
+                    이 점수는 웹사이트의 보안, 안전성, 최신 웹 표준 준수 여부를 평가합니다.<br><br>
+                    <strong>주요 평가 항목:</strong><br>
+                    • HTTPS 적용<br>
+                    • 안전한 JS/CSS 사용<br>
+                    • 최신 브라우저 호환성<br>
+                    • 취약점 없는 라이브러리<br>
+                    • 안전한 외부 리소스 사용<br>
+                    • 사용자 데이터 보호<br>
+                    • 콘솔 에러/경고 최소화<br><br>
+                    <strong>Google PageSpeed 기준:</strong><br>
+                    • 90-100: 매우 안전<br>
+                    • 80-89: 양호<br>
+                    • 70-79: 개선 필요<br>
+                    • 70 미만: 심각한 개선 필요
+                  </div>
+                </div>
+                <div class="metric-icon">
+                  <i class="bi bi-shield-lock"></i>
+                </div>
+                <h3 class="metric-title">보안
+                </h3>
+                <div class="progress">
+                  <div class="progress-bar" role="progressbar" style="width: 68%;" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="metric-value"></div>
+                <div class="metric-description">보안 및 인증 점수</div>
+              </div>
+            </div>
+          </div>
+          <!-- 방사형 레이더 차트 추가 -->
+          <div class="radar-chart-container mt-5">
+            <h3 class="chart-title">성능 종합 분석</h3>
+            <div class="chart-wrapper" style="position:relative;">
+              <div id="radarChartLoading" style="text-align:center; font-size:1.2rem; color:#0072ff; padding:40px 0;">성능 분석 계산 중...</div>
+              <canvas id="performanceRadarChart" style="display:none;"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 시장 환경 분석 섹션 -->
+      <div class="card shadow-sm mb-5">
+        <div class="card-body p-4">
+          <h2 class="section-title">
+            <i class="bi bi-globe"></i> 시장 환경 분석
+          </h2>
+          <p class="section-description">
+            <span id="industry-display">업종</span> 업종의 시장 환경 분석 결과입니다. 이 데이터는 수집된 최신 정보를 기반으로 합니다.
+          </p>
+          <div id="market-analysis-loading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">로딩중...</span>
+            </div>
+            <p class="mt-2">시장 데이터를 분석 중입니다...</p>
+          </div>
+          <div id="market-analysis-content" class="d-none">
+            <div class="row mt-4 g-4">
+              <div class="col-md-3 col-6">
+                <div class="market-card">
+                  <h3 class="market-title">시장 규모</h3>
+                  <div class="market-value" id="market-size">분석 중...</div>
+                  <div class="market-description">현재 국내 시장 규모</div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6">
+                <div class="market-card">
+                  <h3 class="market-title">성장률</h3>
+                  <div class="market-value" id="growth-rate">분석 중...</div>
+                  <div class="market-description">연간 시장 성장률</div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6">
+                <div class="market-card">
+                  <h3 class="market-title">온라인 비중</h3>
+                  <div class="market-value" id="online-ratio">분석 중...</div>
+                  <div class="market-description">전체 시장 중 온라인 비중</div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6">
+                <div class="market-card">
+                  <h3 class="market-title">모바일 비중</h3>
+                  <div class="market-value" id="mobile-ratio">분석 중...</div>
+                  <div class="market-description">온라인 쇼핑 중 모바일 비중</div>
+                </div>
+              </div>
+            </div>
+            <h3 class="subsection-title mt-5">최신 시장 트렌드</h3>
+            <div class="trends-list mt-3" id="market-trends"></div>
+            <h3 class="subsection-title mt-5">최신 뉴스 및 분석</h3>
+            <div class="news-list mt-3" id="market-news"></div>
+            <h3 class="subsection-title mt-5">SWOT 분석</h3>
+            <div class="row mt-3 g-4">
+              <div class="col-md-6">
+                <div class="swot-card swot-strength">
+                  <h4 class="swot-title">강점 (Strengths)</h4>
+                  <ul class="swot-list" id="swot-strengths"></ul>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="swot-card swot-weakness">
+                  <h4 class="swot-title">약점 (Weaknesses)</h4>
+                  <ul class="swot-list" id="swot-weaknesses"></ul>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="swot-card swot-opportunity">
+                  <h4 class="swot-title">기회 (Opportunities)</h4>
+                  <ul class="swot-list" id="swot-opportunities"></ul>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="swot-card swot-threat">
+                  <h4 class="swot-title">위협 (Threats)</h4>
+                  <ul class="swot-list" id="swot-threats"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 고도몰 VS 카페24 섹션 -->
+      <div class="card shadow-sm mb-5">
+        <div class="card-body p-4">
+          <h2 class="section-title">
+            <i class="bi bi-bar-chart"></i> 고도몰 VS 카페24
+          </h2>
+          <p class="section-description">
+            고도몰과 카페24 플랫폼의 주요 기능과 서비스를 비교 분석한 결과입니다.
+          </p>
+          <div class="comparison-section">
+            <div class="comparison-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>항목</th>
+                    <th>고도몰</th>
+                    <th>카페24</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>이용료</td>
+                    <td>월 3~9만원</td>
+                    <td class="highlight">무료 솔루션 제공</td>
+                  </tr>
+                  <tr>
+                    <td>운영 인프라</td>
+                    <td>트래픽 증가 시 추가 과금,<br>속도 저하 발생</td>
+                    <td class="highlight">무료 무제한 트래픽 제공,<br>자동 확장 및 부하 분산 지원</td>
+                  </tr>
+                  <tr>
+                    <td>판매 채널</td>
+                    <td>국내 오픈마켓 위주 연동 지원<br>(연 46~418만원), 유튜브 쇼핑 미지원</td>
+                    <td class="highlight">강력한 유튜브 쇼핑 연동,<br>무료로 전 세계 60개 판매 채널 연동 지원</td>
+                  </tr>
+                  <tr>
+                    <td>기능 확장성</td>
+                    <td>기본 기능/운영 중심,<br>약 140개 앱 제공</td>
+                    <td class="highlight">프로모션, CRM 등 다양한 카테고리<br>약 380개 앱 제공, 오픈 API로 손쉬운 기능 확장</td>
+                  </tr>
+                  <tr>
+                    <td>마케팅 자동화</td>
+                    <td>광고/GA 연동 일부 미지원</td>
+                    <td class="highlight">광고, SNS, 유튜브 연동 자동화 지원</td>
+                  </tr>
+                  <tr>
+                    <td>보안/장애 대응</td>
+                    <td>잦은 서버 오류 발생</td>
+                    <td class="highlight">ISMS 인증,<br>24시간 모니터링 지원</td>
+                  </tr>
+                  <tr>
+                    <td>글로벌 진출</td>
+                    <td>제휴사 통한 Lazada, Shopee 연동<br>(연 46~418만원 비용 발생)</td>
+                    <td class="highlight">Amazon, Shopee, AliExpress 등 무료 직연동,<br>다국어 쇼핑몰 구축 및 해외 결제/배송 지원</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 카페24의 경쟁력 섹션 -->
+      <div class="card shadow-sm mb-5">
+        <div class="card-body p-4">
+          <h2 class="section-title text-center mb-4">
+            <i class="bi bi-gem" style="color:#0072ff;"></i> 카페24의 경쟁력
+          </h2>
+          <div class="container-fluid px-0">
+            <div class="row g-4 mb-4">
+              <div class="col-md-4">
+                <div class="competitiveness-metric-card h-100 p-4 d-flex flex-column align-items-center" style="background:#fff; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+                  <div style="font-size:3.2rem; color:#0072ff; font-weight:700; line-height:1; display:flex; align-items:center; justify-content:center; gap:0.7em;"><i class="bi bi-shop"></i><span>200 <span style='font-size:1.3rem;'>만개</span></span></div>
+                  <div class="fw-bold mt-2" style="font-size:1.15rem;">쇼핑몰 브랜드수</div>
+                  <div class="text-muted mt-1" style="font-size:1rem;">200만 고객이 쌓아온 쇼핑몰 성공 노하우</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="competitiveness-metric-card h-100 p-4 d-flex flex-column align-items-center" style="background:#fff; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+                  <div style="font-size:3.2rem; color:#0072ff; font-weight:700; line-height:1; display:flex; align-items:center; justify-content:center; gap:0.7em;"><i class="bi bi-cash-stack"></i><span>11.3 <span style='font-size:1.3rem;'>조원</span></span></div>
+                  <div class="fw-bold mt-2" style="font-size:1.15rem;">거래액(GMV)</div>
+                  <div class="text-muted mt-1" style="font-size:1rem;">플랫폼 내 거래액 11조원 거래액 돌파</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="competitiveness-metric-card h-100 p-4 d-flex flex-column align-items-center" style="background:#fff; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+                  <div style="font-size:3.2rem; color:#0072ff; font-weight:700; line-height:1; display:flex; align-items:center; justify-content:center; gap:0.7em;"><i class="bi bi-layout-text-window"></i><span>30 <span style='font-size:1.3rem;'>만개</span></span></div>
+                  <div class="fw-bold mt-2" style="font-size:1.15rem;">디자인 템플릿</div>
+                  <div class="text-muted mt-1" style="font-size:1rem;">전문 디자이너들이 제공하는 다양한 디자인 템플릿</div>
+                </div>
+              </div>
+            </div>
+            <div class="row g-4 mt-2">
+              <div class="col-md-4">
+                <div class="competitiveness-metric-card h-100 p-4 d-flex flex-column align-items-center" style="background:#fff; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+                  <div style="font-size:3.2rem; color:#0072ff; font-weight:700; line-height:1; display:flex; align-items:center; justify-content:center; gap:0.7em;"><i class="bi bi-person"></i><span>2.6 <span style='font-size:1.3rem;'>만개</span></span></div>
+                  <div class="fw-bold mt-2" style="font-size:1.15rem;">파트너사</div>
+                  <div class="text-muted mt-1" style="font-size:1rem;">국내 최다 파트너사 보유</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="competitiveness-metric-card h-100 p-4 d-flex flex-column align-items-center" style="background:#fff; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+                  <div style="font-size:3.2rem; color:#0072ff; font-weight:700; line-height:1; display:flex; align-items:center; justify-content:center; gap:0.7em;"><i class="bi bi-wrench-adjustable"></i><span>430 <span style='font-size:1.3rem;'>개</span></span></div>
+                  <div class="fw-bold mt-2" style="font-size:1.15rem;">오픈 API</div>
+                  <div class="text-muted mt-1" style="font-size:1rem;">플랫폼 업계 최다 수준 API 제공</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="competitiveness-metric-card h-100 p-4 d-flex flex-column align-items-center" style="background:#fff; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+                  <div style="font-size:3.2rem; color:#0072ff; font-weight:700; line-height:1; display:flex; align-items:center; justify-content:center; gap:0.7em;"><i class="bi bi-translate"></i><span>6 <span style='font-size:1.3rem;'>개</span></span></div>
+                  <div class="fw-bold mt-2" style="font-size:1.15rem;">6개 언어로 세계 시장에 판매</div>
+                  <div class="text-muted mt-1" style="font-size:1rem;">영어, 중국어(간체/번체), 일본어, 베트남어 등으로 쇼핑몰 생성해 손쉽게 관리 가능</div>
+                </div>
+              </div>
+            </div>
+            <div class="row g-4 mt-2">
+              <div class="col-md-4">
+                <div class="competitiveness-metric-card h-100 p-4 d-flex flex-column align-items-center" style="background:#fff; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+                  <div class="fw-bold" style="font-size:1.5rem; font-weight:700; text-align:left; width:100%;">이벤트 대응 능력</div>
+                  <div class="text-muted mt-2" style="font-size:1rem; text-align:left; width:100%; margin-top:0.7rem !important;">28,000대 이상의 서버와 460Gbps 백본망으로 99.9% 이상의 서비스 안정성 보장. 대규모 트래픽에도 안정적인 서비스 제공이 가능합니다.</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="competitiveness-metric-card h-100 p-4 d-flex flex-column align-items-center" style="background:#fff; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+                  <div class="fw-bold" style="font-size:1.5rem; font-weight:700; text-align:left; width:100%;">유튜브 쇼핑 연동</div>
+                  <div class="text-muted mt-2" style="font-size:1rem; text-align:left; width:100%; margin-top:0.7rem !important;">국내 이커머스 플랫폼 중 가장 강력한 유튜브 쇼핑 연동 기능 제공. 라이브 커머스, 채널 내 스토어 탭, 동영상 내 상품 태그 등 다양한 판매 채널 확장이 가능합니다. 유튜브 쇼핑 연동을 통해 매출이 증가한 다양한 사례가 있습니다.</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="competitiveness-metric-card h-100 p-4 d-flex flex-column align-items-center" style="background:#fff; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+                  <div class="fw-bold" style="font-size:1.5rem; font-weight:700; text-align:left; width:100%;">안정한 데이터 이전</div>
+                  <div class="text-muted mt-2" style="font-size:1rem; text-align:left; width:100%; margin-top:0.7rem !important;">회원, 상품, 주문 등 핵심 데이터의 안전한 이전 지원. 리뷰 데이터도 최대한 이전을 지원하며, 이전 과정에서 발생할 수 있는 문제에 대한 대응책을 마련합니다. 특히 리뷰 데이터는 고객 신뢰도 유지에 중요한 요소입니다.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 카페24 앱스토어 최근 베스트 10개 앱 추천 섹션 -->
+      <div class="card shadow-sm mb-5">
+        <div class="card-body p-4">
+          <h2 class="section-title">
+            <i class="bi bi-shop-window"></i> 카페24 앱스토어 최근 베스트 10개 앱 추천
+          </h2>
+          <p class="section-description">
+            쇼핑몰 운영에 도움이 되는 다양한 인기 앱들을 만나보세요. (실제 앱 정보는 주기적으로 업데이트될 수 있습니다.)
+          </p>
+          <div class="position-relative" style="min-height:80px;">
+            <div class="overflow-hidden" style="width:100%;padding-right:20px;">
+              <div class="d-flex flex-nowrap" id="appstore-slider" style="transition: transform 0.4s cubic-bezier(.4,0,.2,1); will-change: transform;">
+                <!-- 10개 앱 카드 반복: 기존 .col 구조를 .app-slide로 변경 -->
+                <div class="col app-slide" style="flex:0 0 20%; max-width:20%;">
+                  <div class="card h-100 app-card">
+                    <img src="https://appservice-img.s3.amazonaws.com/apps/zShRoASRLlGlGhCIFtf0AF/ko/list/image" class="card-img-top" alt="앱 썸네일 1" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=No+Image';">
+                    <div class="card-body">
+                      <h5 class="card-title app-title">080 수신거부 서비스</h5>
+                      <p class="card-text app-category small text-muted">고객상담/CS관리</p>
+                      <p class="card-text app-description small">광고/홍보 문자 발송 시 필수적인 080 수신거부 번호를 제공합니다.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col app-slide" style="flex:0 0 20%; max-width:20%;">
+                  <div class="card h-100 app-card">
+                    <img src="https://appservice-img.s3.amazonaws.com/apps/BwJ479cFAVDngv3zVASNqC/ko/list/image" class="card-img-top" alt="앱 썸네일 2" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=No+Image';">
+                    <div class="card-body">
+                      <h5 class="card-title app-title">이벤트 무료 제작! 회원가입과 재구매율을 높이는 카나페</h5>
+                      <p class="card-text app-category small text-muted">이벤트/프로모션</p>
+                      <p class="card-text app-description small">룰렛, 출석체크, 쿠폰 등 다양한 이벤트를 손쉽게 만들고 운영합니다.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col app-slide" style="flex:0 0 20%; max-width:20%;">
+                  <div class="card h-100 app-card">
+                    <img src="https://appservice-img.s3.amazonaws.com/apps/BzaIKqrbMpCrhoouuxtKMA/ko/list/image" class="card-img-top" alt="앱 썸네일 3" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=No+Image';">
+                    <div class="card-body">
+                      <h5 class="card-title app-title">키키미션즈 - 성장형 게임 플랫폼</h5>
+                      <p class="card-text app-category small text-muted">이벤트/프로모션</p>
+                      <p class="card-text app-description small">쇼핑몰에 게임 요소를 도입하여 고객 참여와 재방문을 유도합니다.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col app-slide" style="flex:0 0 20%; max-width:20%;">
+                  <div class="card h-100 app-card">
+                    <img src="https://appservice-img.s3.amazonaws.com/apps/RhBsav0edKXMhV7l23tcvD/ko/list/image" class="card-img-top" alt="앱 썸네일 4" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=No+Image';">
+                    <div class="card-body">
+                      <h5 class="card-title app-title">내 샵 안에 소셜미디어 👍 스토리북</h5>
+                      <p class="card-text app-category small text-muted">SNS/소셜미디어</p>
+                      <p class="card-text app-description small">인스타그램, 유튜브 등 소셜 콘텐츠를 쇼핑몰에 연동하여 보여줍니다.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col app-slide" style="flex:0 0 20%; max-width:20%;">
+                  <div class="card h-100 app-card">
+                    <img src="https://appservice-img.s3.amazonaws.com/apps/bGpzMnlKP1dkOzcWq8c3SB/ko/list/image" class="card-img-top" alt="앱 썸네일 5" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=No+Image';">
+                    <div class="card-body">
+                      <h5 class="card-title app-title">디자인 주문서</h5>
+                      <p class="card-text app-category small text-muted">상품/편집/콘텐츠</p>
+                      <p class="card-text app-description small">옵션이 많은 상품이나 맞춤 제작 상품의 주문을 쉽게 받을 수 있도록 돕습니다.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col app-slide" style="flex:0 0 20%; max-width:20%;">
+                  <div class="card h-100 app-card">
+                    <img src="https://appservice-img.s3.amazonaws.com/apps/yWXYf2UAcClaD7bTBwTUQG/ko/list/image" class="card-img-top" alt="앱 썸네일 6" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=No+Image';">
+                    <div class="card-body">
+                      <h5 class="card-title app-title">간편 회원가입, 앱 설치 팝업 등 쇼핑몰에 필요한 모든 기능</h5>
+                      <p class="card-text app-category small text-muted">마케팅/CRM</p>
+                      <p class="card-text app-description small">다양한 마케팅 팝업과 위젯을 제공하여 구매 전환율을 높입니다.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col app-slide" style="flex:0 0 20%; max-width:20%;">
+                  <div class="card h-100 app-card">
+                    <img src="https://appservice-img.s3.amazonaws.com/apps/QKWiDNLcK9koJO0swpfnuE/ko/list/image" class="card-img-top" alt="앱 썸네일 7" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=No+Image';">
+                    <div class="card-body">
+                      <h5 class="card-title app-title">이커머스 상담 솔루션 1위, 채널톡</h5>
+                      <p class="card-text app-category small text-muted">고객상담/CS관리</p>
+                      <p class="card-text app-description small">채팅상담, CRM, 마케팅 기능을 통합 제공하는 올인원 고객 솔루션입니다.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col app-slide" style="flex:0 0 20%; max-width:20%;">
+                  <div class="card h-100 app-card">
+                    <img src="https://appservice-img.s3.amazonaws.com/apps/Qm8Cl8euLi5EXok37uWmfJ/ko/list/image" class="card-img-top" alt="앱 썸네일 8" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=No+Image';">
+                    <div class="card-body">
+                      <h5 class="card-title app-title">스냅푸시(SNAP PUSH) 팝업/알림</h5>
+                      <p class="card-text app-category small text-muted">팝업/알림</p>
+                      <p class="card-text app-description small">타겟팅 기반의 스마트한 팝업과 알림으로 고객 행동을 유도합니다.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col app-slide" style="flex:0 0 20%; max-width:20%;">
+                  <div class="card h-100 app-card">
+                    <img src="https://appservice-img.s3.amazonaws.com/apps/cRXz3pfSQKUabed6XC2h6N/ko/list/image" class="card-img-top" alt="앱 썸네일 9" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=No+Image';">
+                    <div class="card-body">
+                      <h5 class="card-title app-title">30일 무료 ⚡️ 쇼츠24 숏폼 동영상 서비스</h5>
+                      <p class="card-text app-category small text-muted">영상/숏폼/라이브커머스</p>
+                      <p class="card-text app-description small">상품 상세페이지에 숏폼 영상을 손쉽게 추가하여 구매 전환율을 높입니다.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col app-slide" style="flex:0 0 20%; max-width:20%;">
+                  <div class="card h-100 app-card">
+                    <img src="https://appservice-img.s3.amazonaws.com/apps/2WE7UswjBZfCZniFeYw2bD/ko/list/image" class="card-img-top" alt="앱 썸네일 10" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=No+Image';">
+                    <div class="card-body">
+                      <h5 class="card-title app-title">로보MD 배너</h5>
+                      <p class="card-text app-category small text-muted">배너</p>
+                      <p class="card-text app-description small">AI가 쇼핑몰 데이터를 분석하여 최적의 상품 배너를 자동으로 생성하고 노출합니다.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between w-100 mt-4" style="max-width:100%;">
+              <div id="swiper-button-prev" class="swiper-button-prev" tabindex="0" role="button" aria-label="Previous slide" style="position:static !important; top:auto !important; left:auto !important; right:auto !important; transform:none !important; margin:0 !important;">
+                <img src="https://img.echosting.cafe24.com/ec/shop_kr/v2/main/btn_arrow_next.svg" alt="이전">
+              </div>
+              <a href="https://store.cafe24.com/kr/curation/199/apps" target="_blank" class="btn btn-outline-primary btn-lg mx-auto">자세히 보기</a>
+              <div id="swiper-button-next" class="swiper-button-next" tabindex="0" role="button" aria-label="Next slide" style="position:static !important; top:auto !important; left:auto !important; right:auto !important; transform:none !important; margin:0 !important;">
+                <img src="https://img.echosting.cafe24.com/ec/shop_kr/v2/main/btn_arrow_prev.svg" alt="다음">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card shadow-sm mb-5">
+        <div class="card-body p-4">
+          <h2 class="section-title">
+            <i class="bi bi-star-fill" style="color:#0072ff;"></i> 카페24 레퍼런스
+          </h2>
+          <p class="section-description">
+            다음은 고도몰에서 카페24로 전환하여 성공적으로 비즈니스를 운영 중인 주요 고객사례입니다. 
+          </p>
+          <div class="google-slide-container" style="width:1114px; max-width:100%; margin:0 auto; padding:0; background:transparent;">
+            <iframe
+              src="https://docs.google.com/presentation/d/10pAwkNG6wguRESJZZgPTysZi_pkqkUwl_gOLHCxRT5k/embed?start=false&loop=false&delayms=3000"
+              frameborder="0"
+              style="width:1114px; max-width:100%; height:627px; min-height:0; min-width:0; background:transparent; border:0; display:block; margin:0 auto; padding:0;"
+              allowfullscreen="true"
+              mozallowfullscreen="true"
+              webkitallowfullscreen="true">
+            </iframe>
+          </div>
+        </div>
+      </div>
+      <!-- 결론 및 제안 섹션 -->
+      <div class="card shadow-sm mb-5">
+        <div class="card-body p-4">
+          <h2 class="section-title">
+            <i class="bi bi-check-circle"></i> 결론 및 제안
+          </h2>
+          <p class="section-description">
+            분석 결과를 바탕으로 <span id="domain-conclusion">도메인</span>의 온라인 비즈니스 성장을 위한 카페24 전환 제안입니다.
+          </p>
+          <div class="conclusion-points mt-4">
+            <div class="conclusion-point">
+              <div class="conclusion-icon">
+                <i class="bi bi-piggy-bank"></i>
+              </div>
+              <div class="conclusion-content">
+                <h3 class="conclusion-title">비용 효율성</h3>
+                <p class="conclusion-text">카페24로 전환 시 월 운영 비용을 68% 절감하여 3년간 약 6.8억 원의 비용을 절약할 수 있습니다.</p>
+              </div>
+            </div>
+            <div class="conclusion-point">
+              <div class="conclusion-icon">
+                <i class="bi bi-speedometer2"></i>
+              </div>
+              <div class="conclusion-content">
+                <h3 class="conclusion-title">성능 향상</h3>
+                <p class="conclusion-text">로딩 속도, 모바일 최적화, SEO 점수 등 전반적인 쇼핑몰 성능이 평균 30% 이상 향상됩니다.</p>
+              </div>
+            </div>
+            <div class="conclusion-point">
+              <div class="conclusion-icon">
+                <i class="bi bi-graph-up-arrow"></i>
+              </div>
+              <div class="conclusion-content">
+                <h3 class="conclusion-title">매출 증대</h3>
+                <p class="conclusion-text">전환율 42% 향상으로 추가적인 매출 증대 효과를 기대할 수 있습니다.</p>
+              </div>
+            </div>
+            <div class="conclusion-point">
+              <div class="conclusion-icon">
+                <i class="bi bi-tools"></i>
+              </div>
+              <div class="conclusion-content">
+                <h3 class="conclusion-title">유지보수 간소화</h3>
+                <p class="conclusion-text">카페24의 통합 관리 시스템으로 유지보수 작업이 간소화되어 운영 효율성이 크게 향상됩니다.</p>
+              </div>
+            </div>
+          </div>
+          <div class="cta-container mt-5 text-center">
+            <h3 class="cta-title">지금 카페24로 전환하세요</h3>
+            <p class="cta-text">카페24 전문 컨설턴트가 원활한 전환을 도와드립니다.</p>
+            <a href="https://www.cafe24.com/enterprise/consulting.html" class="btn btn-primary btn-lg mt-3" target="_blank">무료 상담 신청하기</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="py-3 bg-light">
+      <div class="container text-center">
+        <p class="text-muted mb-0">© 2025 카페24. All rights reserved.</p>
+      </div>
+    </footer>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // 쿼리스트링 파싱(도메인, 업종)
+    const params = new URLSearchParams(window.location.search);
+    const domain = params.get('domain') || 'example.com';
+    const industry = params.get('industry') || '일반 소매/커머스';
+
+    // 로딩 애니메이션 및 결과 표시
+    let percent = 0;
+    let loadingDone = false; // API 완료 플래그
+    let reachedNinetyNineAt = null; // 99% 도달 시각
+    let apiDoneAt = null; // API 완료 시각
+    const progressBar = document.getElementById('loadingProgressBar');
+    const percentText = document.getElementById('loadingPercentage');
+    const circleFg = document.querySelector('.circle-fg');
+    const maxDash = 220;
+    function setProgress(p) {
+      progressBar.style.width = p + '%';
+      percentText.textContent = p + '%';
+      // 원형 로더 애니메이션
+      const dashoffset = maxDash - (maxDash * p / 100);
+      circleFg.setAttribute('stroke-dashoffset', dashoffset);
+    }
+    setProgress(0);
+    const interval = setInterval(() => {
+      if (percent < 99) {
+        percent += Math.floor(Math.random() * 3) + 1; // 1~3%씩 증가
+        if (percent > 99) percent = 99;
+        setProgress(percent);
+        if (percent === 99) reachedNinetyNineAt = Date.now();
+      }
+      // API가 끝났고 99%에 도달했으면 0.5초 후 100%로 전환
+      if (loadingDone && percent === 99 && apiDoneAt && Date.now() - apiDoneAt > 500) {
+        finishLoading();
+      }
+    }, 350);
+
+    function finishLoading() {
+      percent = 100;
+      setProgress(100);
+      clearInterval(interval);
+      setTimeout(() => {
+        document.getElementById('loadingOverlay').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('loadingOverlay').style.display = 'none';
+          document.getElementById('resultPage').style.display = 'block';
+          // '로딩중...'으로 덮는 코드 삭제됨
+          if (typeof initResultPage === 'function') initResultPage(domain, industry);
+        }, 500);
+      }, 800);
+    }
+
+    // 결과 페이지용 데이터 바인딩 및 차트/동적 데이터 초기화 함수
+    function initResultPage(domain, industry) {
+      // 도메인 및 업종 표시
+      document.getElementById('domain-text').textContent = domain;
+      document.getElementById('domain-display').textContent = domain;
+      document.getElementById('domain-name').textContent = domain;
+      document.getElementById('domain-conclusion').textContent = domain;
+      document.getElementById('industry-display').textContent = industry;
+
+      // (PageSpeed 점수 업데이트는 여기서 제거)
+
+      // 시장 분석 데이터 생성 및 표시 함수
+      function generateMarketData(domain, industry) {
+        renderTrends(industry);
+        renderNewsFromApi(industry); // 실제 DB+OpenAI 요약 데이터만 노출
+        const brandName = domain.split('.')[0];
+        renderSwot(brandName);
+      }
+
+      // 트렌드 데이터 생성 함수 (OpenAI API 연동)
+      async function fetchTrendsFromOpenAI(industry) {
+        const prompt = `${industry} 업종의 최근 6개월간 주목받은 시장 트렌드 3가지를 한글로, 각각 title(제목)과 description(1~2문장 설명)으로 JSON 배열로 알려줘. 예시: [{\"title\":\"트렌드 제목\",\"description\":\"설명\"}]`;
+        const response = await fetch('http://118.130.18.151:3001/api/openai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, max_tokens: 600 })
+        });
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+        let trends = [];
+        try {
+          const jsonMatch = content.match(/\[.*\]/s);
+          if (jsonMatch) {
+            trends = JSON.parse(jsonMatch[0]);
+          } else {
+            trends = JSON.parse(content);
+          }
+        } catch (e) {
+          trends = [{ title: '트렌드 데이터 파싱 실패', description: '최신 트렌드 데이터를 불러오지 못했습니다.' }];
+        }
+        return trends;
+      }
+      async function renderTrends(industry) {
+        const trendsContainer = document.getElementById('market-trends');
+        trendsContainer.innerHTML = '<div style="text-align:center;color:#0072ff;font-weight:500;">AI 분석 중</div>';
+        const trends = await fetchTrendsFromOpenAI(industry);
+        trendsContainer.innerHTML = '';
+        trends.forEach(trend => {
+          const trendItem = document.createElement('div');
+          trendItem.className = 'trend-item';
+          trendItem.innerHTML = `
+            <i class=\"bi bi-arrow-up-right\"></i>
+            <span><strong>${trend.title}</strong>: ${trend.description}</span>
+          `;
+          trendsContainer.appendChild(trendItem);
+        });
+      }
+      // 실제 DB+OpenAI 요약 데이터만 노출하는 함수
+      async function renderNewsFromApi(category) {
+        const newsContainer = document.getElementById('market-news');
+        newsContainer.innerHTML = '<div style="text-align:center;color:#0072ff;font-weight:500;">뉴스 불러오는 중...</div>';
+        try {
+          const res = await fetch(`http://118.130.18.151:3001/api/news?category=${encodeURIComponent(category)}`);
+          const newsList = await res.json();
+          newsContainer.innerHTML = newsList.map(item => `
+            <div class="news-item">
+              <h4 class="news-title">${item.title}</h4>
+              <div class="news-source">${item.channel} | ${item.date ? item.date.split('T')[0] : ''}</div>
+              <p class="news-summary">${item.summary}</p>
+              <a class="news-link" href="${item.url}" target="_blank">자세히 보기</a>
+            </div>
+          `).join('');
+        } catch (e) {
+          newsContainer.innerHTML = '<div style="color:red;">뉴스를 불러오지 못했습니다.</div>';
+        }
+      }
+      // SWOT 데이터 생성 함수 (OpenAI API 연동)
+      async function fetchSwotFromOpenAI(brandName) {
+        const prompt = `${brandName} 브랜드의 최근 시장 상황을 반영한 SWOT 분석을 한글로, strengths, weaknesses, opportunities, threats 각각 3개씩 JSON 형식으로 알려줘. 예시: {\"strengths\": [\"강점1\",...], \"weaknesses\": [\"약점1\",...], \"opportunities\": [\"기회1\",...], \"threats\": [\"위협1\",...]}`;
+        const response = await fetch('http://118.130.18.151:3001/api/openai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, max_tokens: 800 })
+        });
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+        let swot = {};
+        try {
+          const jsonMatch = content.match(/\{.*\}/s);
+          if (jsonMatch) {
+            swot = JSON.parse(jsonMatch[0]);
+          } else {
+            swot = JSON.parse(content);
+          }
+        } catch (e) {
+          swot = {
+            strengths: ['SWOT 데이터 파싱 실패'],
+            weaknesses: ['SWOT 데이터 파싱 실패'],
+            opportunities: ['SWOT 데이터 파싱 실패'],
+            threats: ['SWOT 데이터 파싱 실패']
+          };
+        }
+        return swot;
+      }
+      async function renderSwot(brandName) {
+        // 각 SWOT 영역에 AI 분석 중 메시지 표시
+        const strengthsList = document.getElementById('swot-strengths');
+        const weaknessesList = document.getElementById('swot-weaknesses');
+        const opportunitiesList = document.getElementById('swot-opportunities');
+        const threatsList = document.getElementById('swot-threats');
+        strengthsList.innerHTML = '<li style="color:#0072ff;font-weight:500;">AI 분석 중</li>';
+        weaknessesList.innerHTML = '<li style="color:#0072ff;font-weight:500;">AI 분석 중</li>';
+        opportunitiesList.innerHTML = '<li style="color:#0072ff;font-weight:500;">AI 분석 중</li>';
+        threatsList.innerHTML = '<li style="color:#0072ff;font-weight:500;">AI 분석 중</li>';
+        const swot = await fetchSwotFromOpenAI(brandName);
+        // 강점
+        strengthsList.innerHTML = '';
+        (swot.strengths || []).forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = item;
+          strengthsList.appendChild(li);
+        });
+        // 약점
+        weaknessesList.innerHTML = '';
+        (swot.weaknesses || []).forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = item;
+          weaknessesList.appendChild(li);
+        });
+        // 기회
+        opportunitiesList.innerHTML = '';
+        (swot.opportunities || []).forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = item;
+          opportunitiesList.appendChild(li);
+        });
+        // 위협
+        threatsList.innerHTML = '';
+        (swot.threats || []).forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = item;
+          threatsList.appendChild(li);
+        });
+      }
+      // 시장 분석 데이터 표시
+      document.getElementById('market-analysis-loading').classList.add('d-none');
+      document.getElementById('market-analysis-content').classList.remove('d-none');
+      generateMarketData(domain, industry);
+      // 트렌드 데이터 생성 및 표시 (OpenAI API 기반)
+      renderTrends(industry);
+      renderNewsFromApi(industry);
+      const brandName = domain.split('.')[0];
+      renderSwot(brandName);
+    }
+
+    // === PageSpeed API 데이터 추출용 함수 추가 ===
+    function normalizeDomain(domain) {
+      if (/^https?:\/\//.test(domain)) return domain;
+      return 'https://' + domain;
+    }
+
+    async function fetchPageSpeedData(domain, apiKey) {
+      const normalized = normalizeDomain(domain);
+      const url = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(normalized)}&strategy=mobile&category=performance&category=accessibility&category=seo&category=best-practices&key=${apiKey}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('PageSpeed API 호출 실패');
+      return response.json();
+    }
+
+    function extractScores(data) {
+      const lighthouse = data.lighthouseResult;
+      if (!lighthouse || !lighthouse.categories) {
+        return { speed: null, mobile: null, seo: null, security: null };
+      }
+      return {
+        speed: typeof lighthouse.categories.performance?.score === 'number' ? Math.round(lighthouse.categories.performance.score * 100) : null,
+        mobile: typeof lighthouse.categories.accessibility?.score === 'number' ? Math.round(lighthouse.categories.accessibility.score * 100) : null,
+        seo: typeof lighthouse.categories.seo?.score === 'number' ? Math.round(lighthouse.categories.seo.score * 100) : null,
+        security: typeof lighthouse.categories['best-practices']?.score === 'number' ? Math.round(lighthouse.categories['best-practices'].score * 100) : null
+      };
+    }
+
+    async function updateScoresWithRealData(domain, apiKey) {
+      try {
+        document.getElementById('radarChartLoading').style.display = 'block';
+        document.getElementById('performanceRadarChart').style.display = 'none';
+        const data = await fetchPageSpeedData(domain, apiKey);
+        const scores = extractScores(data);
+        // === 점수 갱신 ===
+        const speedEl = document.querySelector('#metric-speed .metric-value');
+        const mobileEl = document.querySelector('#metric-mobile .metric-value');
+        const seoEl = document.querySelector('#metric-seo .metric-value');
+        const securityEl = document.querySelector('#metric-security .metric-value');
+
+        document.querySelector('#metric-speed .progress-bar').style.width = (scores.speed !== null ? scores.speed : 0) + '%';
+        if (speedEl) speedEl.textContent = scores.speed !== null ? `${scores.speed}/100` : 'N/A';
+
+        document.querySelector('#metric-mobile .progress-bar').style.width = (scores.mobile !== null ? scores.mobile : 0) + '%';
+        if (mobileEl) mobileEl.textContent = scores.mobile !== null ? `${scores.mobile}/100` : 'N/A';
+
+        document.querySelector('#metric-seo .progress-bar').style.width = (scores.seo !== null ? scores.seo : 0) + '%';
+        if (seoEl) seoEl.textContent = scores.seo !== null ? `${scores.seo}/100` : 'N/A';
+
+        document.querySelector('#metric-security .progress-bar').style.width = (scores.security !== null ? scores.security : 0) + '%';
+        if (securityEl) securityEl.textContent = scores.security !== null ? `${scores.security}/100` : 'N/A';
+
+        // 2. 차트 표시, 로딩 텍스트 숨김
+        document.getElementById('radarChartLoading').style.display = 'none';
+        // canvas가 반드시 보이도록 강제 지정
+        const canvas = document.getElementById('performanceRadarChart');
+        canvas.style.display = 'block';
+        setTimeout(() => {
+          if (window.radarChart) {
+            window.radarChart.destroy();
+            window.radarChart = null;
+          }
+          const ctx = canvas.getContext('2d');
+          const chartData = {
+            labels: ['로딩 속도', '모바일 최적화', '보안성', '비용 효율성', 'SEO 점수'],
+            datasets: [
+              {
+                label: '현재 성능',
+                data: [
+                  scores.speed !== null ? scores.speed : 0,
+                  scores.mobile !== null ? scores.mobile : 0,
+                  scores.security !== null ? scores.security : 0,
+                  45,
+                  scores.seo !== null ? scores.seo : 0
+                ],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(54, 162, 235, 1)'
+              },
+              {
+                label: '카페24 예상 성능',
+                data: [90, 84, 100, 90, 92],
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(255, 99, 132, 1)'
+              }
+            ]
+          };
+          const options = {
+            scales: {
+              r: {
+                angleLines: { display: true },
+                suggestedMin: 0,
+                suggestedMax: 100
+              }
+            },
+            plugins: {
+              legend: {
+                display: false // 기본 legend 숨김
+              }
+            }
+          };
+          window.radarChart = new Chart(ctx, { type: 'radar', data: chartData, options: options });
+
+          // === HTML legend 직접 생성 및 info/툴팁 추가 (generateLegend 미사용, 완전 수동) ===
+          setTimeout(() => {
+            // 차트가 숨겨져 있으면 범례도 숨김
+            if (canvas.style.display === 'none') {
+              let customLegend = document.getElementById('custom-radar-legend');
+              if (customLegend) customLegend.style.display = 'none';
+              return;
+            }
+            // 기존 legend 있으면 제거
+            let customLegend = document.getElementById('custom-radar-legend');
+            if (customLegend) customLegend.remove();
+            // === 직접 범례 생성 ===
+            const legendDiv = document.createElement('div');
+            legendDiv.id = 'custom-radar-legend';
+            legendDiv.style.display = 'flex';
+            legendDiv.style.justifyContent = 'center';
+            legendDiv.style.gap = '2rem';
+            legendDiv.style.marginTop = '18px';
+            const ul = document.createElement('ul');
+            ul.style.display = 'flex';
+            ul.style.gap = '2rem';
+            ul.style.listStyle = 'none';
+            ul.style.margin = '0';
+            ul.style.padding = '0';
+            window.radarChart.data.datasets.forEach(ds => {
+              const li = document.createElement('li');
+              li.style.display = 'flex';
+              li.style.alignItems = 'center';
+              li.style.fontSize = '1rem';
+              // 색상 원
+              const dot = document.createElement('span');
+              dot.style.display = 'inline-block';
+              dot.style.width = '14px';
+              dot.style.height = '14px';
+              dot.style.borderRadius = '50%';
+              dot.style.marginRight = '7px';
+              dot.style.background = ds.borderColor;
+              li.appendChild(dot);
+              // 텍스트
+              const txt = document.createElement('span');
+              txt.textContent = ds.label;
+              li.appendChild(txt);
+              // info/툴팁
+              if (ds.label === '카페24 예상 성능') {
+                const info = document.createElement('span');
+                info.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" style="vertical-align:middle;"><circle cx="8" cy="8" r="8" fill="#999"/><circle cx="8" cy="5" r="1.1" fill="#fff"/><rect x="7.2" y="7" width="1.6" height="5" rx="0.8" fill="#fff"/></svg>`;
+                info.style.cursor = 'pointer';
+                info.style.marginLeft = '2px';
+                info.style.display = 'inline-flex';
+                info.style.alignItems = 'center';
+                // 툴팁 div
+                const tooltip = document.createElement('div');
+                tooltip.textContent = '카페24 대표 고객사의 실제 데이터를 기반으로 예측한 성능입니다.';
+                tooltip.style.position = 'absolute';
+                tooltip.style.background = '#f5f5f7';
+                tooltip.style.color = '#222';
+                tooltip.style.padding = '7px 14px';
+                tooltip.style.borderRadius = '7px';
+                tooltip.style.fontSize = '0.95em';
+                tooltip.style.whiteSpace = 'nowrap';
+                tooltip.style.zIndex = '9999';
+                tooltip.style.display = 'none';
+                tooltip.style.pointerEvents = 'none';
+                tooltip.style.boxShadow = '0 2px 8px rgba(0,0,0,0.18)';
+                document.body.appendChild(tooltip);
+                info.addEventListener('mouseenter', e => {
+                  tooltip.style.display = 'block';
+                  const rect = info.getBoundingClientRect();
+                  tooltip.style.left = (rect.left + window.scrollX + rect.width/2 - tooltip.offsetWidth/2) + 'px';
+                  tooltip.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+                });
+                info.addEventListener('mouseleave', () => {
+                  tooltip.style.display = 'none';
+                });
+                li.appendChild(info);
+                li.style.position = 'relative';
+              }
+              ul.appendChild(li);
+            });
+            legendDiv.appendChild(ul);
+            // 차트 아래에 legend 삽입
+            canvas.parentNode.appendChild(legendDiv);
+          }, 100);
+        }, 50);
+        // === API 완료 시점 기록 ===
+        loadingDone = true;
+        apiDoneAt = Date.now();
+        // 만약 percent가 이미 99%라면 0.5초 후 100%로 올림
+        if (percent === 99) {
+          // 0.5초 후 finishLoading 호출 (setInterval에서 처리)
+        }
+      } catch (e) {
+        console.error(e);
+        // 실패 시 더미 데이터 유지 또는 에러 메시지 표시
+        const speedEl = document.querySelector('#metric-speed .metric-value');
+        const mobileEl = document.querySelector('#metric-mobile .metric-value');
+        const seoEl = document.querySelector('#metric-seo .metric-value');
+        const securityEl = document.querySelector('#metric-security .metric-value');
+        if (speedEl) speedEl.textContent = 'N/A';
+        if (mobileEl) mobileEl.textContent = 'N/A';
+        if (seoEl) seoEl.textContent = 'N/A';
+        if (securityEl) securityEl.textContent = 'N/A';
+        document.getElementById('radarChartLoading').textContent = '성능 분석에 실패했습니다.';
+        document.getElementById('performanceRadarChart').style.display = 'none';
+        loadingDone = true;
+        if (percent >= 99) {
+          percent = 100;
+          setProgress(100);
+          clearInterval(interval);
+          setTimeout(() => {
+            document.getElementById('loadingOverlay').style.opacity = '0';
+            setTimeout(() => {
+              document.getElementById('loadingOverlay').style.display = 'none';
+              document.getElementById('resultPage').style.display = 'block';
+              // '로딩중...'으로 덮는 코드 삭제됨
+              if (typeof initResultPage === 'function') initResultPage(domain, industry);
+            }, 500);
+          }, 800);
+        }
+      }
+    }
+
+    // === 최초 진입 시점에 updateScoresWithRealData 호출 위치 변경 ===
+    // 기존: setTimeout(() => { ... updateScoresWithRealData ... }, 500);
+    // 변경: 아래에서 바로 호출
+    const apiKey = 'AIzaSyBW24qRpt1nE6w06nZ0cTZ4Dp4tGHH2Tpo';
+    updateScoresWithRealData(domain, apiKey);
+
+    // === 앱스토어 롤링 슬라이더 ===
+    (function() {
+      const slider = document.getElementById('appstore-slider');
+      const slides = slider ? slider.querySelectorAll('.app-slide') : [];
+      const prevBtn = document.getElementById('swiper-button-prev');
+      const nextBtn = document.getElementById('swiper-button-next');
+      const visibleCount = 5;
+      const moveCount = 5;
+      let currentIndex = 0;
+      function updateSlider() {
+        const slideWidth = slides[0]?.offsetWidth || 0;
+        const gap = parseFloat(getComputedStyle(slider).gap || '0');
+        slider.style.transform = `translateX(-${currentIndex * (slideWidth + gap)}px)`;
+        if (currentIndex === 0) {
+          prevBtn.classList.add('swiper-button-disabled');
+        } else {
+          prevBtn.classList.remove('swiper-button-disabled');
+        }
+        if (currentIndex >= slides.length - visibleCount) {
+          nextBtn.classList.add('swiper-button-disabled');
+        } else {
+          nextBtn.classList.remove('swiper-button-disabled');
+        }
+      }
+      if (slider && slides.length > visibleCount) {
+        prevBtn.addEventListener('click', function() {
+          if (currentIndex > 0) {
+            currentIndex = Math.max(0, currentIndex - moveCount);
+            updateSlider();
+          }
+        });
+        nextBtn.addEventListener('click', function() {
+          if (currentIndex < slides.length - visibleCount) {
+            currentIndex = Math.min(slides.length - visibleCount, currentIndex + moveCount);
+            updateSlider();
+          }
+        });
+        window.addEventListener('resize', updateSlider);
+        updateSlider();
+      } else {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+      }
+    })();
+
+    // === 기존 스크립트 하단에 추가 ===
+    (function() {
+      // 쿼리스트링에서 industry(카테고리명) 추출
+      const params = new URLSearchParams(window.location.search);
+      const industry = params.get('industry') || '일반 소매/커머스';
+
+      async function renderNewsFromApi(category) {
+        const newsContainer = document.getElementById('market-news');
+        newsContainer.innerHTML = '<div style="text-align:center;color:#0072ff;font-weight:500;">뉴스 불러오는 중...</div>';
+        try {
+          const res = await fetch(`http://118.130.18.151:3001/api/news?category=${encodeURIComponent(category)}`);
+          const newsList = await res.json();
+          newsContainer.innerHTML = newsList.map(item => `
+            <div class="news-item">
+              <h4 class="news-title">${item.title}</h4>
+              <div class="news-source">${item.channel} | ${item.date ? item.date.split('T')[0] : ''}</div>
+              <p class="news-summary">${item.summary}</p>
+              <a class="news-link" href="${item.url}" target="_blank">자세히 보기</a>
+            </div>
+          `).join('');
+        } catch (e) {
+          newsContainer.innerHTML = '<div style="color:red;">뉴스를 불러오지 못했습니다.</div>';
+        }
+      }
+
+      // 페이지 로드 시 자동 실행
+      renderNewsFromApi(industry);
+    })();
+  </script>
+</body>
+</html> 

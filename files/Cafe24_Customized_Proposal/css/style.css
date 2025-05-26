@@ -1,0 +1,333 @@
+/* Market Analysis Styles */
+.market-analysis-section {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card {
+    border-radius: 15px;
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-title {
+    color: #333;
+    font-weight: 600;
+}
+
+.display-6 {
+    font-weight: 600;
+    color: #0d6efd;
+}
+
+/* Trends and News Styles */
+.trend-item, .news-item {
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.trend-item:last-child, .news-item:last-child {
+    margin-bottom: 0;
+}
+
+.trend-item h5, .news-item h5 {
+    margin-bottom: 10px;
+    color: #0d6efd;
+}
+
+.trend-item p, .news-item p {
+    margin-bottom: 0;
+    color: #666;
+}
+
+/* SWOT Analysis Styles */
+.swot-item {
+    padding: 20px;
+    border-radius: 10px;
+    height: 100%;
+}
+
+#swot-strengths {
+    border-left: 5px solid #198754;
+}
+
+#swot-weaknesses {
+    border-left: 5px solid #dc3545;
+}
+
+#swot-opportunities {
+    border-left: 5px solid #0d6efd;
+}
+
+#swot-threats {
+    border-left: 5px solid #ffc107;
+}
+
+/* Loading Spinner Styles */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 20px;
+    }
+    
+    .swot-item {
+        margin-bottom: 20px;
+    }
+}
+
+/* Animation for Content Loading */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+#market-analysis-content.show {
+    display: block !important;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* 시장 분석 섹션 스타일 */
+.market-analysis-section .card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease-in-out;
+}
+
+.market-analysis-section .card:hover {
+    transform: translateY(-2px);
+}
+
+.market-analysis-section .display-6 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.market-analysis-section .card-title {
+    color: #6c757d;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+/* 트렌드 아이템 스타일 */
+.trend-item {
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    margin-bottom: 1rem;
+}
+
+.trend-item h5 {
+    color: #343a40;
+    margin-bottom: 0.5rem;
+}
+
+.trend-item p {
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+/* 뉴스 아이템 스타일 */
+.news-item {
+    padding: 1.5rem;
+    border-radius: 8px;
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    margin-bottom: 1rem;
+}
+
+.news-item h5 {
+    color: #343a40;
+    margin-bottom: 0.75rem;
+}
+
+.news-item p {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.news-item .news-date {
+    color: #adb5bd;
+    font-size: 0.875rem;
+}
+
+/* SWOT 분석 스타일 */
+.swot-item {
+    height: 100%;
+}
+
+.swot-item h4 {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.swot-item ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.swot-item ul li {
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.swot-item ul li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: currentColor;
+}
+
+/* 로딩 인디케이터 스타일 */
+#market-analysis-loading {
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#market-analysis-loading p {
+    color: #6c757d;
+    margin-top: 1rem;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* 시장 분석 섹션 스타일 */
+.market-analysis-content {
+  font-size: 0.95rem;
+}
+
+.market-subtitle {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+/* 트렌드 카드 스타일 */
+.trend-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  height: 100%;
+  transition: transform 0.2s;
+}
+
+.trend-card:hover {
+  transform: translateY(-3px);
+}
+
+.trend-card h4 {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin-bottom: 0.75rem;
+}
+
+.trend-card p {
+  color: #6c757d;
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+/* 뉴스 카드 스타일 */
+.news-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  margin-bottom: 1rem;
+}
+
+.news-card .news-date {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.news-card h4 {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin-bottom: 0.75rem;
+}
+
+.news-card .news-source {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* SWOT 분석 카드 스타일 */
+.swot-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  height: 100%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.swot-card h4 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.swot-card ul {
+  padding-left: 1.25rem;
+  margin-bottom: 0;
+}
+
+.swot-card li {
+  margin-bottom: 0.5rem;
+  color: #495057;
+  line-height: 1.5;
+}
+
+.swot-card.strengths {
+  border-top: 4px solid #28a745;
+}
+
+.swot-card.weaknesses {
+  border-top: 4px solid #dc3545;
+}
+
+.swot-card.opportunities {
+  border-top: 4px solid #17a2b8;
+}
+
+.swot-card.threats {
+  border-top: 4px solid #ffc107;
+}
+
+/* 로딩 스피너 스타일 */
+#market-loading {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+} 
